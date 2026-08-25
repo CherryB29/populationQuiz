@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>인구 수 퀴즈</title>
     
-    <!-- 아이폰 및 브라우저가 100% 인식하는 표준 SVG 기반 지구본 아이콘 -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%233182F6'/%3E%3Cpath d='M15 35h70M15 65h70M50 4c18 15 18 77 0 92M50 4c-18 15-18 77 0 92' fill='none' stroke='%23fff' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
     <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%233182F6'/%3E%3Ccircle cx='50' cy='50' r='40' fill='%233182F6'/%3E%3Cpath d='M15 35h70M15 65h70M50 10c15 13 15 67 0 80M50 10c-15 13-15 67 0 80' fill='none' stroke='%23fff' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E">
     
@@ -117,7 +116,6 @@
 </head>
 <body class="flex items-center justify-center min-h-screen text-[#191F28] sm:p-4 bg-[#E5E8EB]">
 
-    <!-- App Container -->
     <div class="app-container bg-white flex flex-col relative overflow-hidden sm:ring-1 sm:ring-gray-900/5">
         <div id="app" class="flex-1 w-full h-full overflow-y-auto overflow-x-hidden relative flex flex-col">
             <!-- JS 렌더링 영역 -->
@@ -140,22 +138,46 @@
         { name: "일본", code: "jp", pop: 123294000, age: [12, 59, 29], medianAge: 48.6 },
         { name: "필리핀", code: "ph", pop: 117337000, age: [28, 66, 6], medianAge: 25.7 },
         { name: "이집트", code: "eg", pop: 112716000, age: [33, 62, 5], medianAge: 24.8 },
+        { name: "콩고민주공화국", code: "cd", pop: 102262000, age: [42, 55, 3], medianAge: 16.8 },
         { name: "베트남", code: "vn", pop: 98858000, age: [22, 69, 9], medianAge: 32.5 },
+        { name: "이란", code: "ir", pop: 89172000, age: [24, 69, 7], medianAge: 32.0 },
+        { name: "튀르키예", code: "tr", pop: 85816000, age: [23, 64, 13], medianAge: 33.5 },
         { name: "독일", code: "de", pop: 83294000, age: [14, 64, 22], medianAge: 45.7 },
         { name: "태국", code: "th", pop: 71801000, age: [15, 71, 14], medianAge: 40.1 },
         { name: "영국", code: "gb", pop: 67736000, age: [18, 63, 19], medianAge: 40.6 },
         { name: "프랑스", code: "fr", pop: 64756000, age: [17, 62, 21], medianAge: 41.7 },
-        { name: "이탈리아", code: "it", pop: 58870000, age: [12, 64, 24], medianAge: 47.7 },
+        { name: "탄자니아", code: "tz", pop: 65497000, age: [43, 54, 3], medianAge: 17.7 },
         { name: "남아프리카 공화국", code: "za", pop: 60414000, age: [28, 66, 6], medianAge: 27.6 },
+        { name: "이탈리아", code: "it", pop: 58870000, age: [12, 64, 24], medianAge: 47.7 },
+        { name: "케냐", code: "ke", pop: 55100000, age: [38, 59, 3], medianAge: 20.1 },
+        { name: "콜롬비아", code: "co", pop: 52085000, age: [23, 68, 9], medianAge: 31.5 },
         { name: "대한민국", code: "kr", pop: 51784000, age: [11, 71, 18], medianAge: 44.5 },
         { name: "스페인", code: "es", pop: 47519000, age: [14, 66, 20], medianAge: 44.9 },
+        { name: "아르헨티나", code: "ar", pop: 45773000, age: [22, 64, 14], medianAge: 31.8 },
         { name: "알제리", code: "dz", pop: 45606000, age: [30, 64, 6], medianAge: 28.5 },
+        { name: "이라크", code: "iq", pop: 45504000, age: [40, 57, 3], medianAge: 21.3 },
+        { name: "수단", code: "sd", pop: 46874000, age: [39, 58, 3], medianAge: 19.9 },
+        { name: "폴란드", code: "pl", pop: 41026000, age: [15, 64, 21], medianAge: 42.0 },
         { name: "캐나다", code: "ca", pop: 38781000, age: [16, 65, 19], medianAge: 41.1 },
+        { name: "모로코", code: "ma", pop: 37840000, age: [26, 64, 10], medianAge: 29.8 },
         { name: "사우디아라비아", code: "sa", pop: 36947000, age: [25, 71, 4], medianAge: 31.8 },
-        { name: "호주", code: "au", pop: 26439000, age: [18, 65, 17], medianAge: 37.5 },
+        { name: "우즈베키스탄", code: "uz", pop: 35163000, age: [31, 63, 6], medianAge: 28.1 },
+        { name: "페루", code: "pe", pop: 34352000, age: [26, 66, 8], medianAge: 29.1 },
+        { name: "말레이시아", code: "my", pop: 34308000, age: [23, 69, 8], medianAge: 30.3 },
+        { name: "가나", code: "gh", pop: 33475000, age: [37, 59, 4], medianAge: 21.5 },
+        { name: "우크라이나", code: "ua", pop: 36744000, age: [15, 67, 18], medianAge: 41.2 },
+        { name: "네팔", code: "np", pop: 30896000, age: [28, 63, 9], medianAge: 25.3 },
+        { name: "베네수엘라", code: "ve", pop: 28838000, age: [27, 63, 10], medianAge: 29.0 },
+        { name: "오스트레일리아(호주)", code: "au", pop: 26439000, age: [18, 65, 17], medianAge: 37.5 },
+        { name: "카메룬", code: "cm", pop: 28647000, age: [42, 55, 3], medianAge: 18.7 },
+        { name: "스웨덴", code: "se", pop: 10612000, age: [17, 62, 21], medianAge: 41.1 },
+        { name: "스위스", code: "ch", pop: 8796000, age: [14, 64, 22], medianAge: 43.1 },
+        { name: "오스트리아", code: "at", pop: 8958000, age: [14, 62, 24], medianAge: 43.5 },
+        { name: "벨기에", code: "be", pop: 11686000, age: [17, 63, 20], medianAge: 41.9 },
+        { name: "노르웨이", code: "no", pop: 5474000, age: [17, 63, 20], medianAge: 40.0 },
+        { name: "뉴질랜드", code: "nz", pop: 5228000, age: [19, 62, 19], medianAge: 37.9 },
         { name: "싱가포르", code: "sg", pop: 6014000, age: [12, 72, 16], medianAge: 42.2 },
-        { name: "케냐", code: "ke", pop: 55100000, age: [38, 59, 3], medianAge: 20.1 },
-        { name: "카자흐스탄", code: "kz", pop: 19606000, age: [30, 62, 8], medianAge: 30.7 }
+        { name: "쿠바", code: "cu", pop: 11212000, age: [16, 64, 20], medianAge: 42.4 }
     ];
 
     const getOldDependency = (country) => ((country.age[2] / country.age[1]) * 100).toFixed(1);
@@ -219,7 +241,7 @@
                     </button>
 
                     <div class="pt-3 text-center">
-                        <p class="text-[11px] text-gray-400 font-medium">데이터 기준: 2023-2024 통계청/UN 근사치</p>
+                        <p class="text-[11px] text-gray-400 font-medium">데이터 기준: 2023-2024 통계청/UN 근사치 (총 ${countriesData.length}개국)</p>
                     </div>
                 </div>
             </div>
