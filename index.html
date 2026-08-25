@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>인구 수 퀴즈</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+    <style>
+        :root {
+            --toss-blue: #3182F6;
+            --toss-gray-bg: #F2F4F6;
+            --toss-text-main: #191F28;
+            --toss-green: #34C759;
+            --toss-red: #FF3B30;
+        }
+        
+        body {
+            font-family: 'Pretendard Variable', -apple-system, sans-serif;
+            background-color: #E5E8EB;
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior-y: none;
+        }
+
+        ::-webkit-scrollbar { display: none; }
+        
+        .btn-press {
+            transition: transform 0.15s cubic-bezier(0.2, 0, 0, 1), background-color 0.2s, opacity 0.2s;
+        }
+        .btn-press:active:not(:disabled) {
+            transform: scale(0.97);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .option-btn {
+            background-color: var(--toss-gray-bg);
+            color: var(--toss-text-main);
+            border: 2px solid transparent;
+            transition: all 0.25s ease;
+        }
+
+        .option-btn.correct {
+            background-color: rgba(52, 199, 89, 0.12) !important;
+            border-color: var(--toss-green) !important;
+            color: #12822C !important;
+            transform: scale(1.02);
+            z-index: 10;
+        }
+        .option-btn.wrong {
+            background-color: rgba(255, 59, 48, 0.12) !important;
+            border-color: var(--toss-red) !important;
+            color: #C51309 !important;
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        .option-btn.dimmed {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        .progress-bar {
+            transition: width 0.3s ease-out;
+        }
+
+        .app-container {
+            width: 100%;
+            height: 100dvh;
+        }
+
+        @media (min-width: 640px) {
+            .app-container {
+                max-width: 640px;
+                height: clamp(680px, 90vh, 800px);
+                border-radius: 32px;
+                box-shadow: 0 24px 60px -12px rgba(0,0,0,0.12);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .app-container {
+                max-width: 720px;
+                height: 760px;
+            }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen text-[#191F28] sm:p-6 bg-[#E5E8EB]">
+
+    <!-- App Container -->
+    <div class="app-container bg-white flex flex-col relative overflow-hidden sm:ring-1 sm:ring-gray-900/5">
+        <div id="app" class="flex-1 w-full h-full overflow-y-auto overflow-x-hidden relative flex flex-col">
+            <!-- JS 렌더링 영역 -->
+        </div>
+    </div>
+
+<script>
+    // 주요국 인구 수, 연령대별 구조(%)[유소년, 청장년, 노년], 중위 연령(세) 데이터
+    // 계산되는 지표:
+    // - 노년부양비 = (노년층 / 청장년층) * 100
+    // - 노령화지수 = (노년층 / 유소년층) * 100
+    const countriesData = [
+        { name: "중국", code: "cn", pop: 1425671000, age: [17, 69, 14], medianAge: 38.4 },
+        { name: "인도", code: "in", pop: 1428627000, age: [25, 68, 7], medianAge: 28.2 },
+        { name: "미국", code: "us", pop: 339996000, age: [18, 65, 17], medianAge: 38.5 },
+        { name: "인도네시아", code: "id", pop: 277534000, age: [25, 68, 7], medianAge: 29.7 },
+        { name: "파키스탄", code: "pk", pop: 240485000, age: [36, 60, 4], medianAge: 20.6 },
+        { name: "나이지리아", code: "ng", pop: 223800000, age: [43, 54, 3], medianAge: 18.1 },
+        { name: "브라질", code: "br", pop: 216422000, age: [20, 70, 10], medianAge: 33.5 },
+        { name: "방글라데시", code: "bd", pop: 172954000, age: [26, 68, 6], medianAge: 27.6 },
+        { name: "러시아", code: "ru", pop: 144444000, age: [17, 67, 16], medianAge: 40.3 },
+        { name: "멕시코", code: "mx", pop: 128455000, age: [24, 68, 8], medianAge: 29.3 },
+        { name: "에티오피아", code: "et", pop: 126527000, age: [39, 58, 3], medianAge: 18.8 },
+        { name: "일본", code: "jp", pop: 123294000, age: [12, 59, 29], medianAge: 48.6 },
+        { name: "필리핀", code: "ph", pop: 117337000, age: [28, 66, 6], medianAge: 25.7 },
+        { name: "이집트", code: "eg", pop: 112716000, age: [33, 62, 5], medianAge: 24.8 },
+        { name: "베트남", code: "vn", pop: 98858000, age: [22, 69, 9], medianAge: 32.5 },
+        { name: "독일", code: "de", pop: 83294000, age: [14, 64, 22], medianAge: 45.7 },
+        { name: "태국", code: "th", pop: 71801000, age: [15, 71, 14], medianAge: 40.1 },
+        { name: "영국", code: "gb", pop: 67736000, age: [18, 63, 19], medianAge: 40.6 },
+        { name: "프랑스", code: "fr", pop: 64756000, age: [17, 62, 21], medianAge: 41.7 },
+        { name: "이탈리아", code: "it", pop: 58870000, age: [12, 64, 24], medianAge: 47.7 },
+        { name: "남아프리카 공화국", code: "za", pop: 60414000, age: [28, 66, 6], medianAge: 27.6 },
+        { name: "대한민국", code: "kr", pop: 51784000, age: [11, 71, 18], medianAge: 44.5 },
+        { name: "스페인", code: "es", pop: 47519000, age: [14, 66, 20], medianAge: 44.9 },
+        { name: "알제리", code: "dz", pop: 45606000, age: [30, 64, 6], medianAge: 28.5 },
+        { name: "캐나다", code: "ca", pop: 38781000, age: [16, 65, 19], medianAge: 41.1 },
+        { name: "사우디아라비아", code: "sa", pop: 36947000, age: [25, 71, 4], medianAge: 31.8 },
+        { name: "호주", code: "au", pop: 26439000, age: [18, 65, 17], medianAge: 37.5 },
+        { name: "싱가포르", code: "sg", pop: 6014000, age: [12, 72, 16], medianAge: 42.2 },
+        { name: "케냐", code: "ke", pop: 55100000, age: [38, 59, 3], medianAge: 20.1 },
+        { name: "카자흐스탄", code: "kz", pop: 19606000, age: [30, 62, 8], medianAge: 30.7 }
+    ];
+
+    // 지표 파생 도우미 함수
+    const getOldDependency = (country) => ((country.age[2] / country.age[1]) * 100).toFixed(1);
+    const getAgingIndex = (country) => ((country.age[2] / country.age[0]) * 100).toFixed(1);
+
+    const shuffle = (array) => [...array].sort(() => Math.random() - 0.5);
+
+    const formatPop = (num) => {
+        if (num >= 100000000) {
+            const eok = Math.floor(num / 100000000);
+            const man = Math.floor((num % 100000000) / 10000);
+            if (man > 0) return `${eok}억 ${man}만 명`;
+            return `${eok}억 명`;
+        } else {
+            const man = Math.floor(num / 10000);
+            return `${man}만 명`;
+        }
+    };
+
+    const getFlagUrl = (code) => `https://flagcdn.com/w320/${code}.png`;
+
+    const state = {
+        mode: null,
+        questions: [],
+        currentIndex: 0,
+        score: 0,
+        isLocked: false,
+        totalQuestions: 10
+    };
+
+    const appEl = document.getElementById('app');
+
+    function renderMenu() {
+        appEl.innerHTML = `
+            <div class="flex-1 flex flex-col justify-between px-6 py-8 fade-in h-full">
+                <div class="my-auto text-center">
+                    <div class="flex justify-center mb-6">
+                        <div class="relative w-20 h-20 bg-[#F2F4F6] rounded-[24px] flex items-center justify-center shadow-sm">
+                            <span class="text-[36px] z-10 absolute -translate-x-2 -translate-y-1">🌍</span>
+                            <span class="text-[36px] z-20 absolute translate-x-2 translate-y-2">👥</span>
+                        </div>
+                    </div>
+                    <h1 class="text-[28px] font-extrabold tracking-tight mb-2">인구 수 퀴즈</h1>
+                    <p class="text-[#8B95A1] text-[15px] leading-relaxed break-keep">세계 주요 국가들의 인구 수와<br>연령대·고령화 지표를 맞춰보세요.</p>
+                </div>
+                
+                <div class="space-y-3.5 w-full max-w-md mx-auto mb-auto">
+                    <button onclick="startQuiz('pop')" class="btn-press w-full bg-[#F2F4F6] text-[#191F28] rounded-[20px] p-4 text-left border border-black/5">
+                        <div class="text-[17px] font-bold mb-0.5">인구 수 맞추기</div>
+                        <div class="text-[#8B95A1] text-[13px]">제시된 국가의 인구 수 고르기</div>
+                    </button>
+                    
+                    <button onclick="startQuiz('comp')" class="btn-press w-full bg-[#F2F4F6] text-[#191F28] rounded-[20px] p-4 text-left border border-black/5">
+                        <div class="text-[17px] font-bold mb-0.5">국가 비교하기</div>
+                        <div class="text-[#8B95A1] text-[13px]">인구수, 노년부양비, 중위연령, 노령화지수 비교</div>
+                    </button>
+
+                    <button onclick="startQuiz('age')" class="btn-press w-full bg-[#F2F4F6] text-[#191F28] rounded-[20px] p-4 text-left border border-black/5">
+                        <div class="text-[17px] font-bold mb-0.5">인구 구조 맞추기</div>
+                        <div class="text-[#8B95A1] text-[13px]">연령대별 막대그래프를 보고 국가 고르기</div>
+                    </button>
+
+                    <div class="pt-4 text-center">
+                        <p class="text-[11px] text-gray-400 font-medium">데이터 기준: 2023-2024 통계청/UN 근사치</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function startQuiz(mode) {
+        state.mode = mode;
+        state.currentIndex = 0;
+        state.score = 0;
+        state.questions = [];
+        state.isLocked = false;
+
+        let availableCountries = shuffle([...countriesData]);
+
+        if (mode === 'pop') {
+            for (let i = 0; i < state.totalQuestions; i++) {
+                let target = availableCountries[i % availableCountries.length];
+                let tempPool = shuffle([...countriesData].filter(c => c.code !== target.code));
+                let distractors = tempPool.slice(0, 3).map(c => c.pop);
+                let options = shuffle([target.pop, ...distractors]);
+                state.questions.push({ type: 'pop', target, options, answer: target.pop });
+            }
+        } else if (mode === 'comp') {
+            // 다양한 인구/연령 지표별 질문 목록
+            const compTypes = [
+                // 인구 수
+                { 
+                    text: '인구가 가장 많은 국가는?', 
+                    getAnswer: (arr) => [...arr].sort((a,b)=>b.pop - a.pop)[0],
+                    getValueText: (country) => `인구 약 ${formatPop(country.pop)}`
+                },
+                { 
+                    text: '인구가 가장 적은 국가는?', 
+                    getAnswer: (arr) => [...arr].sort((a,b)=>a.pop - b.pop)[0],
+                    getValueText: (country) => `인구 약 ${formatPop(country.pop)}`
+                },
+                // 유소년층 비율
+                { 
+                    text: '유소년층(0~14세) 비율이 가장 높은 국가는?', 
+                    getAnswer: (arr) => [...arr].sort((a,b)=>b.age[0] - a.age[0])[0],
+                    getValueText: (country) => `유소년 비율 ${country.age[0]}%`
+                },
+                { 
+                    text: '유소년층(0~14세) 비율이 가장 낮은 국가는?', 
+                    getAnswer: (arr) => [...arr].sort((a,b)=>a.age[0] - b.age[0])[0],
+                    getValueText: (country) => `유소년 비율 ${country.age[0]}%`
+                },
+                // 노년층 비율
+                { 
+                    text: '노년층(65세 이상) 비율이 가장 높은 국가는?', 
+                    getAnswer: (arr) => [...arr].sort((a,b)=>b.age[2] - a.age[2])[0],
+                    getValueText: (country) => `노년 비율 ${country.age[2]}%`
+                },
+                { 
+                    text: '노년층(65세 이상) 비율이 가장 낮은 국가는?', 
+                    getAnswer: (arr) => [...arr].sort((a,b)=>a.age[2] - b.age[2])[0],
+                    getValueText: (country) => `노년 비율 ${country.age[2]}%`
+                },
+                // 노년 부양비
+                { 
+                    text: '노년 부양비가 가장 높은 국가는?', 
+                    getAnswer: (arr) => [...arr].sort((a,b)=>getOldDependency(b) - getOldDependency(a))[0],
+                    getValueText: (country) => `노년부양비 ${getOldDependency(country)}`
+                },
+                { 
+                    text: '노년 부양비가 가장 낮은 국가는?', 
+                    getAnswer: (arr) => [...arr].sort((a,b)=>getOldDependency(a) - getOldDependency(b))[0],
+                    getValueText: (country) => `노년부양비 ${getOldDependency(country)}`
+                },
+                // 중위 연령
+                { 
+                    text: '중위 연령이 가장 높은(고령화된) 국가는?', 
+                    getAnswer: (arr) => [...arr].sort((a,b)=>b.medianAge - a.medianAge)[0],
+                    getValueText: (country) => `중위 연령 ${country.medianAge}세`
+                },
+                { 
+                    text: '중위 연령이 가장 낮은(젊은) 국가는?', 
+                    getAnswer: (arr) => [...arr].sort((a,b)=>a.medianAge - b.medianAge)[0],
+                    getValueText: (country) => `중위 연령 ${country.medianAge}세`
+                },
+                // 노령화 지수
+                { 
+                    text: '노령화 지수가 가장 높은 국가는?', 
+                    getAnswer: (arr) => [...arr].sort((a,b)=>getAgingIndex(b) - getAgingIndex(a))[0],
+                    getValueText: (country) => `노령화 지수 ${getAgingIndex(country)}`
+                },
+                { 
+                    text: '노령화 지수가 가장 낮은 국가는?', 
+                    getAnswer: (arr) => [...arr].sort((a,b)=>getAgingIndex(a) - getAgingIndex(b))[0],
+                    getValueText: (country) => `노령화 지수 ${getAgingIndex(country)}`
+                }
+            ];
+
+            for (let i = 0; i < state.totalQuestions; i++) {
+                let pool = shuffle([...countriesData]).slice(0, 4);
+                let qType = compTypes[Math.floor(Math.random() * compTypes.length)];
+                let answer = qType.getAnswer(pool);
+                state.questions.push({ 
+                    type: 'comp', 
+                    text: qType.text, 
+                    options: pool, 
+                    answer: answer,
+                    getValueText: qType.getValueText
+                });
+            }
+        } else if (mode === 'age') {
+            for (let i = 0; i < state.totalQuestions; i++) {
+                let target = availableCountries[i % availableCountries.length];
+                let tempPool = shuffle([...countriesData].filter(c => c.code !== target.code));
+                let distractors = tempPool.slice(0, 3);
+                let options = shuffle([target, ...distractors]);
+                state.questions.push({ type: 'age', target, options, answer: target.code });
+            }
+        }
+        
+        renderQuestion();
+    }
+
+    function getHeaderHTML() {
+        const progressPercent = ((state.currentIndex) / state.totalQuestions) * 100;
+        return `
+            <div class="px-6 pt-5 pb-3 bg-white/95 backdrop-blur-md z-20 sticky top-0 sm:rounded-t-[32px] border-b border-gray-100">
+                <div class="flex items-center justify-between mb-3">
+                    <button onclick="renderMenu()" class="btn-press w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full text-gray-600">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                    </button>
+                    <span class="font-bold text-gray-400 text-xs tracking-widest">${state.currentIndex + 1} / ${state.totalQuestions}</span>
+                    <div class="w-8"></div>
+                </div>
+                <div class="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div class="h-full bg-[#3182F6] progress-bar rounded-full" style="width: ${progressPercent}%"></div>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderQuestion() {
+        const q = state.questions[state.currentIndex];
+        state.isLocked = false;
+        
+        let contentHTML = '';
+
+        if (q.type === 'pop') {
+            contentHTML = `
+                <div class="flex-1 px-6 py-6 flex flex-col justify-between fade-in h-full max-w-xl mx-auto w-full">
+                    <div class="flex flex-col items-center justify-center text-center my-auto py-2">
+                        <div class="w-44 h-28 sm:w-52 sm:h-34 rounded-2xl overflow-hidden shadow-md border border-black/10 relative mb-5">
+                            <img src="${getFlagUrl(q.target.code)}" class="w-full h-full object-cover" alt="${q.target.name} 국기" />
+                        </div>
+                        <h2 class="text-[28px] sm:text-[32px] font-extrabold text-center mb-1.5 tracking-tight">${q.target.name}</h2>
+                        <p class="text-[#8B95A1] font-medium text-[15px] sm:text-[16px]">이 국가의 인구 수는 얼마일까요?</p>
+                    </div>
+                    
+                    <div class="space-y-3 w-full mt-6">
+                        ${q.options.map((opt) => `
+                            <button onclick="handleAnswer(${opt}, ${q.answer}, this)" 
+                                    class="option-btn btn-press w-full text-left px-5 py-4 rounded-[20px] flex items-center text-[16px] sm:text-[17px] font-bold"
+                                    data-val="${opt}">
+                                <span>약 ${formatPop(opt)}</span>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        } else if (q.type === 'comp') {
+            contentHTML = `
+                <div class="flex-1 px-6 py-6 flex flex-col justify-between fade-in h-full max-w-xl mx-auto w-full">
+                    <div class="flex flex-col items-center justify-center text-center my-auto py-6">
+                        <h2 class="text-[24px] sm:text-[28px] font-extrabold leading-[1.35] break-keep tracking-tight mb-2.5">${q.text}</h2>
+                        <p class="text-[#8B95A1] font-medium text-[14px]">조건에 알맞은 국가를 고르세요.</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3.5 sm:gap-4 w-full mt-6">
+                        ${q.options.map((opt) => `
+                            <button onclick="handleAnswer('${opt.code}', '${q.answer.code}', this)" 
+                                    class="option-btn btn-press flex flex-col items-center justify-center rounded-[22px] p-3.5 sm:p-5 gap-2 border border-gray-100 bg-[#F9FAFB] relative overflow-hidden"
+                                    data-val="${opt.code}">
+                                <div class="w-[64px] h-[44px] sm:w-[76px] sm:h-[50px] rounded-xl overflow-hidden shadow-sm border border-black/10 relative">
+                                    <img src="${getFlagUrl(opt.code)}" class="w-full h-full object-cover" alt="${opt.name} 국기" />
+                                </div>
+                                <span class="font-bold text-[16px] sm:text-[17px] text-center px-1 break-keep leading-tight">${opt.name}</span>
+                                <!-- 답변 후 수치 표시 라벨 (초기엔 숨김) -->
+                                <span class="value-label hidden text-[12px] font-bold mt-1 px-2.5 py-0.5 rounded-full bg-white/80 shadow-xs border border-black/5">
+                                    ${q.getValueText(opt)}
+                                </span>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        } else if (q.type === 'age') {
+            const young = q.target.age[0];
+            const adult = q.target.age[1];
+            const old = q.target.age[2];
+
+            contentHTML = `
+                <div class="flex-1 px-6 py-6 flex flex-col justify-between fade-in h-full max-w-xl mx-auto w-full">
+                    <!-- 연령대 막대 그래프 (자연/인구증가율 제거하고 깔끔하게 복원) -->
+                    <div class="flex flex-col items-center justify-center text-center my-auto w-full">
+                        <h2 class="text-[22px] sm:text-[25px] font-extrabold leading-tight mb-5">다음 인구 구조를 가진 국가는?</h2>
+                        
+                        <div class="w-full max-w-sm bg-[#F9FAFB] p-5 rounded-2xl border border-gray-200/70 shadow-sm space-y-3">
+                            <div class="text-[12px] font-semibold text-gray-400 text-left">연령대별 인구 비율 (%)</div>
+                            <div class="w-full h-8 bg-gray-200 rounded-xl overflow-hidden flex shadow-inner mb-2">
+                                <div style="width: ${young}%" class="bg-[#38BDF8] h-full flex items-center justify-center text-[11px] font-bold text-white tracking-tighter">${young}%</div>
+                                <div style="width: ${adult}%" class="bg-[#3182F6] h-full flex items-center justify-center text-[11px] font-bold text-white tracking-tighter">${adult}%</div>
+                                <div style="width: ${old}%" class="bg-[#F43F5E] h-full flex items-center justify-center text-[11px] font-bold text-white tracking-tighter">${old}%</div>
+                            </div>
+
+                            <div class="grid grid-cols-3 text-[12px] font-semibold text-gray-600 gap-1 pt-1">
+                                <div class="flex flex-col items-center">
+                                    <span class="text-gray-400 text-[10px]">유소년</span>
+                                    <span class="text-gray-800 font-bold">${young}%</span>
+                                </div>
+                                <div class="flex flex-col items-center border-x border-gray-200">
+                                    <span class="text-gray-400 text-[10px]">청장년</span>
+                                    <span class="text-gray-800 font-bold">${adult}%</span>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <span class="text-gray-400 text-[10px]">노년</span>
+                                    <span class="text-gray-800 font-bold">${old}%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3.5 sm:gap-4 w-full mt-5">
+                        ${q.options.map((opt) => `
+                            <button onclick="handleAnswer('${opt.code}', '${q.answer}', this)" 
+                                    class="option-btn btn-press flex flex-col items-center justify-center rounded-[22px] p-3.5 sm:p-4 gap-2.5 border border-gray-100 bg-[#F9FAFB]"
+                                    data-val="${opt.code}">
+                                <div class="w-[60px] h-[40px] sm:w-[72px] sm:h-[48px] rounded-xl overflow-hidden shadow-sm border border-black/10 relative">
+                                    <img src="${getFlagUrl(opt.code)}" class="w-full h-full object-cover" alt="${opt.name} 국기" />
+                                </div>
+                                <span class="font-bold text-[15px] sm:text-[16px] text-center px-1 break-keep leading-tight">${opt.name}</span>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        appEl.innerHTML = getHeaderHTML() + contentHTML;
+    }
+
+    function handleAnswer(selectedValue, correctValue, btnEl) {
+        if (state.isLocked) return;
+        state.isLocked = true;
+
+        const isCorrect = String(selectedValue) === String(correctValue);
+        if (isCorrect) state.score++;
+
+        const allBtns = document.querySelectorAll('.option-btn');
+        allBtns.forEach(btn => {
+            const val = btn.getAttribute('data-val');
+            
+            // 수치 라벨이 있다면 숨김 해제하여 표시
+            const label = btn.querySelector('.value-label');
+            if (label) label.classList.remove('hidden');
+
+            if (String(val) === String(correctValue)) {
+                btn.classList.add('correct');
+            } else if (String(val) === String(selectedValue) && !isCorrect) {
+                btn.classList.add('wrong');
+            } else {
+                btn.classList.add('dimmed');
+            }
+        });
+
+        if (navigator.vibrate) {
+            if (isCorrect) navigator.vibrate(40);
+            else navigator.vibrate([40, 50, 40]);
+        }
+
+        // 수치 및 해설 확인을 위해 대기 시간 늘림 (2200ms)
+        setTimeout(() => {
+            state.currentIndex++;
+            if (state.currentIndex >= state.totalQuestions) {
+                renderResult();
+            } else {
+                renderQuestion();
+            }
+        }, 2200);
+    }
+
+    function renderResult() {
+        const percentage = (state.score / state.totalQuestions) * 100;
+        let comment = "";
+        let emoji = "";
+        
+        if (percentage === 100) { comment = "완벽해요! 10문제 모두 맞췄습니다."; emoji = "🏆"; }
+        else if (percentage >= 70) { comment = "훌륭해요! 조금만 더 하면 만점이에요."; emoji = "👏"; }
+        else if (percentage >= 40) { comment = "좋아요! 자주 헷갈리는 국가를 복습해봐요."; emoji = "👍"; }
+        else { comment = "괜찮아요! 퀴즈를 통해 인구를 익혀보세요."; emoji = "💪"; }
+
+        appEl.innerHTML = `
+            <div class="flex-1 flex flex-col justify-between p-6 fade-in h-full max-w-xl mx-auto w-full">
+                <div class="flex flex-col items-center justify-center text-center my-auto">
+                    <div class="text-[64px] mb-3">${emoji}</div>
+                    <h2 class="text-base font-bold text-[#8B95A1] mb-1">총 ${state.totalQuestions}문제 중</h2>
+                    <div class="text-[52px] font-extrabold text-[#191F28] leading-none mb-4 tracking-tight">
+                        ${state.score}<span class="text-2xl text-[#191F28] font-bold">개 정답</span>
+                    </div>
+                    <p class="text-[15px] font-bold text-[#4E5968] bg-[#F2F4F6] px-4 py-2.5 rounded-[16px] break-keep">${comment}</p>
+                </div>
+                
+                <div class="space-y-3 w-full mt-6">
+                    <button onclick="startQuiz('${state.mode}')" class="btn-press w-full bg-[#3182F6] text-white font-bold text-[16px] rounded-[18px] py-4 shadow-sm">
+                        다시 도전하기
+                    </button>
+                    <button onclick="renderMenu()" class="btn-press w-full bg-[#F2F4F6] text-[#4E5968] font-bold text-[16px] rounded-[18px] py-4">
+                        홈으로 돌아가기
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    renderMenu();
+
+</script>
+</body>
+</html>
