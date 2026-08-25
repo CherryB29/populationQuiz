@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>인구 수 퀴즈</title>
+    
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌍</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23F2F4F6'/><text x='10' y='78' font-size='75'>🌍</text></svg>">
+    <meta name="apple-mobile-web-app-title" content="인구 수 퀴즈">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#ffffff">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
     <style>
@@ -35,7 +43,7 @@
             animation: fadeIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
         }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(12px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -75,29 +83,41 @@
             transition: width 0.3s ease-out;
         }
 
+        /* 기본 컨테이너 (모바일 세로) */
         .app-container {
             width: 100%;
             height: 100dvh;
         }
 
+        /* 태블릿 세로 및 일반 데스크탑 */
         @media (min-width: 640px) {
             .app-container {
-                max-width: 640px;
-                height: clamp(680px, 90vh, 800px);
+                max-width: 600px;
+                height: clamp(680px, 90vh, 820px);
                 border-radius: 32px;
                 box-shadow: 0 24px 60px -12px rgba(0,0,0,0.12);
             }
         }
 
-        @media (min-width: 1024px) {
+        /* 가로 모드 (아이패드 가로, 데스크탑 넓은 화면) 대응 레이아웃 */
+        @media (min-width: 768px) and (orientation: landscape), (min-width: 900px) {
             .app-container {
-                max-width: 720px;
-                height: 760px;
+                max-width: 920px;
+                height: clamp(520px, 85vh, 640px); /* 짤림 방지 높이 제한 */
             }
+            .ls-row { flex-direction: row !important; align-items: center !important; }
+            .ls-left-align { align-items: flex-start !important; text-align: left !important; }
+            .ls-self-start { align-self: flex-start !important; }
+            .ls-my-0 { margin-top: 0 !important; margin-bottom: 0 !important; }
+            .ls-ml-0 { margin-left: 0 !important; margin-right: auto !important; }
+            .ls-w-half { flex: 1 !important; width: auto !important; }
+            /* 가로 분할 얇은 선 */
+            .ls-divider-v { display: block !important; width: 1px !important; height: 60% !important; background-color: rgba(0,0,0,0.06); margin: 0 2rem; }
+            .ls-divider-h { display: none !important; }
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen text-[#191F28] sm:p-6 bg-[#E5E8EB]">
+<body class="flex items-center justify-center min-h-screen text-[#191F28] sm:p-4 bg-[#E5E8EB]">
 
     <!-- App Container -->
     <div class="app-container bg-white flex flex-col relative overflow-hidden sm:ring-1 sm:ring-gray-900/5">
@@ -107,10 +127,6 @@
     </div>
 
 <script>
-    // 주요국 인구 수, 연령대별 구조(%)[유소년, 청장년, 노년], 중위 연령(세) 데이터
-    // 계산되는 지표:
-    // - 노년부양비 = (노년층 / 청장년층) * 100
-    // - 노령화지수 = (노년층 / 유소년층) * 100
     const countriesData = [
         { name: "중국", code: "cn", pop: 1425671000, age: [17, 69, 14], medianAge: 38.4 },
         { name: "인도", code: "in", pop: 1428627000, age: [25, 68, 7], medianAge: 28.2 },
@@ -144,7 +160,6 @@
         { name: "카자흐스탄", code: "kz", pop: 19606000, age: [30, 62, 8], medianAge: 30.7 }
     ];
 
-    // 지표 파생 도우미 함수
     const getOldDependency = (country) => ((country.age[2] / country.age[1]) * 100).toFixed(1);
     const getAgingIndex = (country) => ((country.age[2] / country.age[0]) * 100).toFixed(1);
 
@@ -177,35 +192,40 @@
 
     function renderMenu() {
         appEl.innerHTML = `
-            <div class="flex-1 flex flex-col justify-between px-6 py-8 fade-in h-full">
-                <div class="my-auto text-center">
-                    <div class="flex justify-center mb-6">
-                        <div class="relative w-20 h-20 bg-[#F2F4F6] rounded-[24px] flex items-center justify-center shadow-sm">
-                            <span class="text-[36px] z-10 absolute -translate-x-2 -translate-y-1">🌍</span>
-                            <span class="text-[36px] z-20 absolute translate-x-2 translate-y-2">👥</span>
-                        </div>
+            <div class="flex-1 flex flex-col px-6 py-10 fade-in h-full justify-center ls-row">
+                
+                <!-- 왼쪽 영역 -->
+                <div class="w-full ls-w-half flex flex-col items-center justify-center text-center mb-10 ls-my-0">
+                    <!-- 심플한 지구 아이콘 (배경 제거) -->
+                    <div class="flex justify-center mb-4">
+                        <span class="text-[76px] sm:text-[84px] leading-none drop-shadow-sm">🌍</span>
                     </div>
-                    <h1 class="text-[28px] font-extrabold tracking-tight mb-2">인구 수 퀴즈</h1>
-                    <p class="text-[#8B95A1] text-[15px] leading-relaxed break-keep">세계 주요 국가들의 인구 수와<br>연령대·고령화 지표를 맞춰보세요.</p>
+                    <h1 class="text-[32px] sm:text-[36px] font-extrabold tracking-tight mb-2 text-[#191F28]">인구 수 퀴즈</h1>
+                    <p class="text-[#8B95A1] text-[15px] sm:text-[16px] font-medium leading-relaxed break-keep max-w-[280px]">세계 주요 국가들의 인구 수와<br>연령대·고령화 지표를 맞춰보세요.</p>
                 </div>
                 
-                <div class="space-y-3.5 w-full max-w-md mx-auto mb-auto">
-                    <button onclick="startQuiz('pop')" class="btn-press w-full bg-[#F2F4F6] text-[#191F28] rounded-[20px] p-4 text-left border border-black/5">
+                <!-- 얇은 구분선 -->
+                <div class="w-full h-[1px] bg-black/5 mb-8 ls-divider-h"></div>
+                <div class="hidden ls-divider-v"></div>
+
+                <!-- 오른쪽 영역 -->
+                <div class="w-full max-w-md mx-auto ls-w-half flex flex-col justify-center space-y-3.5">
+                    <button onclick="startQuiz('pop')" class="btn-press w-full bg-[#F2F4F6] text-[#191F28] rounded-[20px] p-5 text-left border border-black/5 hover:bg-gray-200/60">
                         <div class="text-[17px] font-bold mb-0.5">인구 수 맞추기</div>
-                        <div class="text-[#8B95A1] text-[13px]">제시된 국가의 인구 수 고르기</div>
+                        <div class="text-[#8B95A1] text-[13px] font-medium">제시된 국가의 인구 수 고르기</div>
                     </button>
                     
-                    <button onclick="startQuiz('comp')" class="btn-press w-full bg-[#F2F4F6] text-[#191F28] rounded-[20px] p-4 text-left border border-black/5">
+                    <button onclick="startQuiz('comp')" class="btn-press w-full bg-[#F2F4F6] text-[#191F28] rounded-[20px] p-5 text-left border border-black/5 hover:bg-gray-200/60">
                         <div class="text-[17px] font-bold mb-0.5">국가 비교하기</div>
-                        <div class="text-[#8B95A1] text-[13px]">인구수, 노년부양비, 중위연령, 노령화지수 비교</div>
+                        <div class="text-[#8B95A1] text-[13px] font-medium">인구수, 노년부양비, 중위연령, 노령화지수 비교</div>
                     </button>
 
-                    <button onclick="startQuiz('age')" class="btn-press w-full bg-[#F2F4F6] text-[#191F28] rounded-[20px] p-4 text-left border border-black/5">
+                    <button onclick="startQuiz('age')" class="btn-press w-full bg-[#F2F4F6] text-[#191F28] rounded-[20px] p-5 text-left border border-black/5 hover:bg-gray-200/60">
                         <div class="text-[17px] font-bold mb-0.5">인구 구조 맞추기</div>
-                        <div class="text-[#8B95A1] text-[13px]">연령대별 막대그래프를 보고 국가 고르기</div>
+                        <div class="text-[#8B95A1] text-[13px] font-medium">연령대별 막대그래프를 보고 국가 고르기</div>
                     </button>
 
-                    <div class="pt-4 text-center">
+                    <div class="pt-3 text-center">
                         <p class="text-[11px] text-gray-400 font-medium">데이터 기준: 2023-2024 통계청/UN 근사치</p>
                     </div>
                 </div>
@@ -231,87 +251,26 @@
                 state.questions.push({ type: 'pop', target, options, answer: target.pop });
             }
         } else if (mode === 'comp') {
-            // 다양한 인구/연령 지표별 질문 목록
             const compTypes = [
-                // 인구 수
-                { 
-                    text: '인구가 가장 많은 국가는?', 
-                    getAnswer: (arr) => [...arr].sort((a,b)=>b.pop - a.pop)[0],
-                    getValueText: (country) => `인구 약 ${formatPop(country.pop)}`
-                },
-                { 
-                    text: '인구가 가장 적은 국가는?', 
-                    getAnswer: (arr) => [...arr].sort((a,b)=>a.pop - b.pop)[0],
-                    getValueText: (country) => `인구 약 ${formatPop(country.pop)}`
-                },
-                // 유소년층 비율
-                { 
-                    text: '유소년층(0~14세) 비율이 가장 높은 국가는?', 
-                    getAnswer: (arr) => [...arr].sort((a,b)=>b.age[0] - a.age[0])[0],
-                    getValueText: (country) => `유소년 비율 ${country.age[0]}%`
-                },
-                { 
-                    text: '유소년층(0~14세) 비율이 가장 낮은 국가는?', 
-                    getAnswer: (arr) => [...arr].sort((a,b)=>a.age[0] - b.age[0])[0],
-                    getValueText: (country) => `유소년 비율 ${country.age[0]}%`
-                },
-                // 노년층 비율
-                { 
-                    text: '노년층(65세 이상) 비율이 가장 높은 국가는?', 
-                    getAnswer: (arr) => [...arr].sort((a,b)=>b.age[2] - a.age[2])[0],
-                    getValueText: (country) => `노년 비율 ${country.age[2]}%`
-                },
-                { 
-                    text: '노년층(65세 이상) 비율이 가장 낮은 국가는?', 
-                    getAnswer: (arr) => [...arr].sort((a,b)=>a.age[2] - b.age[2])[0],
-                    getValueText: (country) => `노년 비율 ${country.age[2]}%`
-                },
-                // 노년 부양비
-                { 
-                    text: '노년 부양비가 가장 높은 국가는?', 
-                    getAnswer: (arr) => [...arr].sort((a,b)=>getOldDependency(b) - getOldDependency(a))[0],
-                    getValueText: (country) => `노년부양비 ${getOldDependency(country)}`
-                },
-                { 
-                    text: '노년 부양비가 가장 낮은 국가는?', 
-                    getAnswer: (arr) => [...arr].sort((a,b)=>getOldDependency(a) - getOldDependency(b))[0],
-                    getValueText: (country) => `노년부양비 ${getOldDependency(country)}`
-                },
-                // 중위 연령
-                { 
-                    text: '중위 연령이 가장 높은(고령화된) 국가는?', 
-                    getAnswer: (arr) => [...arr].sort((a,b)=>b.medianAge - a.medianAge)[0],
-                    getValueText: (country) => `중위 연령 ${country.medianAge}세`
-                },
-                { 
-                    text: '중위 연령이 가장 낮은(젊은) 국가는?', 
-                    getAnswer: (arr) => [...arr].sort((a,b)=>a.medianAge - b.medianAge)[0],
-                    getValueText: (country) => `중위 연령 ${country.medianAge}세`
-                },
-                // 노령화 지수
-                { 
-                    text: '노령화 지수가 가장 높은 국가는?', 
-                    getAnswer: (arr) => [...arr].sort((a,b)=>getAgingIndex(b) - getAgingIndex(a))[0],
-                    getValueText: (country) => `노령화 지수 ${getAgingIndex(country)}`
-                },
-                { 
-                    text: '노령화 지수가 가장 낮은 국가는?', 
-                    getAnswer: (arr) => [...arr].sort((a,b)=>getAgingIndex(a) - getAgingIndex(b))[0],
-                    getValueText: (country) => `노령화 지수 ${getAgingIndex(country)}`
-                }
+                { text: '인구가 가장 많은 국가는?', getAnswer: (arr) => [...arr].sort((a,b)=>b.pop - a.pop)[0], getValueText: (country) => `인구 약 ${formatPop(country.pop)}` },
+                { text: '인구가 가장 적은 국가는?', getAnswer: (arr) => [...arr].sort((a,b)=>a.pop - b.pop)[0], getValueText: (country) => `인구 약 ${formatPop(country.pop)}` },
+                { text: '유소년층(0~14세) 비율이 가장 높은 국가는?', getAnswer: (arr) => [...arr].sort((a,b)=>b.age[0] - a.age[0])[0], getValueText: (country) => `유소년 비율 ${country.age[0]}%` },
+                { text: '유소년층(0~14세) 비율이 가장 낮은 국가는?', getAnswer: (arr) => [...arr].sort((a,b)=>a.age[0] - b.age[0])[0], getValueText: (country) => `유소년 비율 ${country.age[0]}%` },
+                { text: '노년층(65세 이상) 비율이 가장 높은 국가는?', getAnswer: (arr) => [...arr].sort((a,b)=>b.age[2] - a.age[2])[0], getValueText: (country) => `노년 비율 ${country.age[2]}%` },
+                { text: '노년층(65세 이상) 비율이 가장 낮은 국가는?', getAnswer: (arr) => [...arr].sort((a,b)=>a.age[2] - b.age[2])[0], getValueText: (country) => `노년 비율 ${country.age[2]}%` },
+                { text: '노년 부양비가 가장 높은 국가는?', getAnswer: (arr) => [...arr].sort((a,b)=>getOldDependency(b) - getOldDependency(a))[0], getValueText: (country) => `노년부양비 ${getOldDependency(country)}` },
+                { text: '노년 부양비가 가장 낮은 국가는?', getAnswer: (arr) => [...arr].sort((a,b)=>getOldDependency(a) - getOldDependency(b))[0], getValueText: (country) => `노년부양비 ${getOldDependency(country)}` },
+                { text: '중위 연령이 가장 높은(고령화된) 국가는?', getAnswer: (arr) => [...arr].sort((a,b)=>b.medianAge - a.medianAge)[0], getValueText: (country) => `중위 연령 ${country.medianAge}세` },
+                { text: '중위 연령이 가장 낮은(젊은) 국가는?', getAnswer: (arr) => [...arr].sort((a,b)=>a.medianAge - b.medianAge)[0], getValueText: (country) => `중위 연령 ${country.medianAge}세` },
+                { text: '노령화 지수가 가장 높은 국가는?', getAnswer: (arr) => [...arr].sort((a,b)=>getAgingIndex(b) - getAgingIndex(a))[0], getValueText: (country) => `노령화 지수 ${getAgingIndex(country)}` },
+                { text: '노령화 지수가 가장 낮은 국가는?', getAnswer: (arr) => [...arr].sort((a,b)=>getAgingIndex(a) - getAgingIndex(b))[0], getValueText: (country) => `노령화 지수 ${getAgingIndex(country)}` }
             ];
 
             for (let i = 0; i < state.totalQuestions; i++) {
                 let pool = shuffle([...countriesData]).slice(0, 4);
                 let qType = compTypes[Math.floor(Math.random() * compTypes.length)];
                 let answer = qType.getAnswer(pool);
-                state.questions.push({ 
-                    type: 'comp', 
-                    text: qType.text, 
-                    options: pool, 
-                    answer: answer,
-                    getValueText: qType.getValueText
-                });
+                state.questions.push({ type: 'comp', text: qType.text, options: pool, answer: answer, getValueText: qType.getValueText });
             }
         } else if (mode === 'age') {
             for (let i = 0; i < state.totalQuestions; i++) {
@@ -329,13 +288,13 @@
     function getHeaderHTML() {
         const progressPercent = ((state.currentIndex) / state.totalQuestions) * 100;
         return `
-            <div class="px-6 pt-5 pb-3 bg-white/95 backdrop-blur-md z-20 sticky top-0 sm:rounded-t-[32px] border-b border-gray-100">
+            <div class="px-5 pt-4 pb-3 bg-white/95 backdrop-blur-md z-20 sticky top-0 sm:rounded-t-[32px]">
                 <div class="flex items-center justify-between mb-3">
-                    <button onclick="renderMenu()" class="btn-press w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full text-gray-600">
+                    <button onclick="renderMenu()" class="btn-press w-9 h-9 flex items-center justify-center bg-gray-100/80 rounded-full text-gray-600">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
                     </button>
                     <span class="font-bold text-gray-400 text-xs tracking-widest">${state.currentIndex + 1} / ${state.totalQuestions}</span>
-                    <div class="w-8"></div>
+                    <div class="w-9"></div>
                 </div>
                 <div class="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
                     <div class="h-full bg-[#3182F6] progress-bar rounded-full" style="width: ${progressPercent}%"></div>
@@ -347,24 +306,32 @@
     function renderQuestion() {
         const q = state.questions[state.currentIndex];
         state.isLocked = false;
+        const qNum = state.currentIndex + 1;
         
         let contentHTML = '';
 
         if (q.type === 'pop') {
             contentHTML = `
-                <div class="flex-1 px-6 py-6 flex flex-col justify-between fade-in h-full max-w-xl mx-auto w-full">
-                    <div class="flex flex-col items-center justify-center text-center my-auto py-2">
-                        <div class="w-44 h-28 sm:w-52 sm:h-34 rounded-2xl overflow-hidden shadow-md border border-black/10 relative mb-5">
+                <div class="flex-1 px-5 py-6 flex flex-col fade-in h-full max-w-3xl mx-auto w-full ls-row justify-center">
+                    <!-- 문제 (가로모드 시 완벽히 좌측 정렬) -->
+                    <div class="w-full ls-w-half flex flex-col items-center justify-center text-center ls-left-align mb-6 ls-my-0">
+                        <span class="inline-block text-[#3182F6] font-extrabold text-[13px] tracking-wider uppercase bg-blue-50 px-3.5 py-1 rounded-full mb-4 self-center ls-self-start">Q${qNum}</span>
+                        <div class="w-40 h-28 sm:w-52 sm:h-36 rounded-[18px] overflow-hidden shadow-md border border-black/10 relative mb-4 sm:mb-5 mx-auto ls-ml-0">
                             <img src="${getFlagUrl(q.target.code)}" class="w-full h-full object-cover" alt="${q.target.name} 국기" />
                         </div>
-                        <h2 class="text-[28px] sm:text-[32px] font-extrabold text-center mb-1.5 tracking-tight">${q.target.name}</h2>
+                        <h2 class="text-[26px] sm:text-[32px] font-extrabold mb-1.5 tracking-tight">${q.target.name}</h2>
                         <p class="text-[#8B95A1] font-medium text-[15px] sm:text-[16px]">이 국가의 인구 수는 얼마일까요?</p>
                     </div>
                     
-                    <div class="space-y-3 w-full mt-6">
+                    <!-- 구분선 -->
+                    <div class="w-full h-[1px] bg-black/5 my-3 ls-divider-h"></div>
+                    <div class="hidden ls-divider-v"></div>
+
+                    <!-- 선택지 -->
+                    <div class="w-full ls-w-half space-y-3 mt-3 ls-my-0 flex flex-col justify-center">
                         ${q.options.map((opt) => `
                             <button onclick="handleAnswer(${opt}, ${q.answer}, this)" 
-                                    class="option-btn btn-press w-full text-left px-5 py-4 rounded-[20px] flex items-center text-[16px] sm:text-[17px] font-bold"
+                                    class="option-btn btn-press w-full text-left px-5 py-4 sm:py-4.5 rounded-[20px] flex items-center text-[16px] sm:text-[17px] font-bold"
                                     data-val="${opt}">
                                 <span>약 ${formatPop(opt)}</span>
                             </button>
@@ -374,23 +341,26 @@
             `;
         } else if (q.type === 'comp') {
             contentHTML = `
-                <div class="flex-1 px-6 py-6 flex flex-col justify-between fade-in h-full max-w-xl mx-auto w-full">
-                    <div class="flex flex-col items-center justify-center text-center my-auto py-6">
-                        <h2 class="text-[24px] sm:text-[28px] font-extrabold leading-[1.35] break-keep tracking-tight mb-2.5">${q.text}</h2>
-                        <p class="text-[#8B95A1] font-medium text-[14px]">조건에 알맞은 국가를 고르세요.</p>
+                <div class="flex-1 px-5 py-6 flex flex-col fade-in h-full max-w-3xl mx-auto w-full ls-row justify-center">
+                    <div class="w-full ls-w-half flex flex-col items-center justify-center text-center ls-left-align mb-6 ls-my-0">
+                        <span class="inline-block text-[#3182F6] font-extrabold text-[13px] tracking-wider uppercase bg-blue-50 px-3.5 py-1 rounded-full mb-4 self-center ls-self-start">Q${qNum}</span>
+                        <h2 class="text-[24px] sm:text-[28px] lg:text-[32px] font-extrabold leading-[1.3] break-keep tracking-tight mb-2.5 max-w-sm mx-auto ls-ml-0">${q.text}</h2>
+                        <p class="text-[#8B95A1] font-medium text-[14px] sm:text-[15px]">조건에 알맞은 국가를 고르세요.</p>
                     </div>
                     
-                    <div class="grid grid-cols-2 gap-3.5 sm:gap-4 w-full mt-6">
+                    <div class="w-full h-[1px] bg-black/5 my-3 ls-divider-h"></div>
+                    <div class="hidden ls-divider-v"></div>
+
+                    <div class="w-full ls-w-half grid grid-cols-2 gap-3 sm:gap-4 mt-3 ls-my-0">
                         ${q.options.map((opt) => `
                             <button onclick="handleAnswer('${opt.code}', '${q.answer.code}', this)" 
-                                    class="option-btn btn-press flex flex-col items-center justify-center rounded-[22px] p-3.5 sm:p-5 gap-2 border border-gray-100 bg-[#F9FAFB] relative overflow-hidden"
+                                    class="option-btn btn-press flex flex-col items-center justify-center rounded-[22px] p-4 sm:p-5 gap-2 border border-gray-100 bg-[#F9FAFB] relative overflow-hidden"
                                     data-val="${opt.code}">
-                                <div class="w-[64px] h-[44px] sm:w-[76px] sm:h-[50px] rounded-xl overflow-hidden shadow-sm border border-black/10 relative">
+                                <div class="w-[60px] h-[40px] sm:w-[80px] sm:h-[52px] rounded-xl overflow-hidden shadow-sm border border-black/10 relative">
                                     <img src="${getFlagUrl(opt.code)}" class="w-full h-full object-cover" alt="${opt.name} 국기" />
                                 </div>
                                 <span class="font-bold text-[16px] sm:text-[17px] text-center px-1 break-keep leading-tight">${opt.name}</span>
-                                <!-- 답변 후 수치 표시 라벨 (초기엔 숨김) -->
-                                <span class="value-label hidden text-[12px] font-bold mt-1 px-2.5 py-0.5 rounded-full bg-white/80 shadow-xs border border-black/5">
+                                <span class="value-label hidden text-[11px] sm:text-[12px] font-bold mt-1 px-2.5 py-0.5 rounded-full bg-white/95 shadow-sm border border-black/5">
                                     ${q.getValueText(opt)}
                                 </span>
                             </button>
@@ -404,42 +374,46 @@
             const old = q.target.age[2];
 
             contentHTML = `
-                <div class="flex-1 px-6 py-6 flex flex-col justify-between fade-in h-full max-w-xl mx-auto w-full">
-                    <!-- 연령대 막대 그래프 (자연/인구증가율 제거하고 깔끔하게 복원) -->
-                    <div class="flex flex-col items-center justify-center text-center my-auto w-full">
-                        <h2 class="text-[22px] sm:text-[25px] font-extrabold leading-tight mb-5">다음 인구 구조를 가진 국가는?</h2>
+                <div class="flex-1 px-5 py-6 flex flex-col fade-in h-full max-w-3xl mx-auto w-full ls-row justify-center">
+                    <div class="w-full ls-w-half flex flex-col items-center justify-center text-center ls-left-align mb-6 ls-my-0">
+                        <span class="inline-block text-[#3182F6] font-extrabold text-[13px] tracking-wider uppercase bg-blue-50 px-3.5 py-1 rounded-full mb-4 self-center ls-self-start">Q${qNum}</span>
+                        <h2 class="text-[22px] sm:text-[26px] font-extrabold leading-tight mb-4">다음 인구 구조를 가진 국가는?</h2>
                         
-                        <div class="w-full max-w-sm bg-[#F9FAFB] p-5 rounded-2xl border border-gray-200/70 shadow-sm space-y-3">
-                            <div class="text-[12px] font-semibold text-gray-400 text-left">연령대별 인구 비율 (%)</div>
-                            <div class="w-full h-8 bg-gray-200 rounded-xl overflow-hidden flex shadow-inner mb-2">
+                        <!-- 막대 차트 (가로 모드 시 완벽하게 좌측 정렬) -->
+                        <div class="w-full max-w-[320px] bg-[#F9FAFB] p-5 rounded-[20px] border border-gray-200/70 shadow-sm space-y-3 mx-auto ls-ml-0">
+                            <div class="text-[12px] font-bold text-gray-400 text-left">연령대별 인구 비율 (%)</div>
+                            <div class="w-full h-8 bg-gray-200 rounded-xl overflow-hidden flex shadow-inner mb-3">
                                 <div style="width: ${young}%" class="bg-[#38BDF8] h-full flex items-center justify-center text-[11px] font-bold text-white tracking-tighter">${young}%</div>
                                 <div style="width: ${adult}%" class="bg-[#3182F6] h-full flex items-center justify-center text-[11px] font-bold text-white tracking-tighter">${adult}%</div>
                                 <div style="width: ${old}%" class="bg-[#F43F5E] h-full flex items-center justify-center text-[11px] font-bold text-white tracking-tighter">${old}%</div>
                             </div>
 
-                            <div class="grid grid-cols-3 text-[12px] font-semibold text-gray-600 gap-1 pt-1">
+                            <div class="grid grid-cols-3 text-[12px] font-semibold text-gray-600 gap-1 text-center">
                                 <div class="flex flex-col items-center">
-                                    <span class="text-gray-400 text-[10px]">유소년</span>
+                                    <span class="text-gray-400 text-[11px]">유소년</span>
                                     <span class="text-gray-800 font-bold">${young}%</span>
                                 </div>
                                 <div class="flex flex-col items-center border-x border-gray-200">
-                                    <span class="text-gray-400 text-[10px]">청장년</span>
+                                    <span class="text-gray-400 text-[11px]">청장년</span>
                                     <span class="text-gray-800 font-bold">${adult}%</span>
                                 </div>
                                 <div class="flex flex-col items-center">
-                                    <span class="text-gray-400 text-[10px]">노년</span>
+                                    <span class="text-gray-400 text-[11px]">노년</span>
                                     <span class="text-gray-800 font-bold">${old}%</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="grid grid-cols-2 gap-3.5 sm:gap-4 w-full mt-5">
+                    <div class="w-full h-[1px] bg-black/5 my-3 ls-divider-h"></div>
+                    <div class="hidden ls-divider-v"></div>
+
+                    <div class="w-full ls-w-half grid grid-cols-2 gap-3 sm:gap-4 mt-3 ls-my-0">
                         ${q.options.map((opt) => `
                             <button onclick="handleAnswer('${opt.code}', '${q.answer}', this)" 
-                                    class="option-btn btn-press flex flex-col items-center justify-center rounded-[22px] p-3.5 sm:p-4 gap-2.5 border border-gray-100 bg-[#F9FAFB]"
+                                    class="option-btn btn-press flex flex-col items-center justify-center rounded-[22px] p-4 sm:p-5 gap-2.5 border border-gray-100 bg-[#F9FAFB]"
                                     data-val="${opt.code}">
-                                <div class="w-[60px] h-[40px] sm:w-[72px] sm:h-[48px] rounded-xl overflow-hidden shadow-sm border border-black/10 relative">
+                                <div class="w-[56px] h-[38px] sm:w-[76px] sm:h-[50px] rounded-xl overflow-hidden shadow-sm border border-black/10 relative">
                                     <img src="${getFlagUrl(opt.code)}" class="w-full h-full object-cover" alt="${opt.name} 국기" />
                                 </div>
                                 <span class="font-bold text-[15px] sm:text-[16px] text-center px-1 break-keep leading-tight">${opt.name}</span>
@@ -464,7 +438,6 @@
         allBtns.forEach(btn => {
             const val = btn.getAttribute('data-val');
             
-            // 수치 라벨이 있다면 숨김 해제하여 표시
             const label = btn.querySelector('.value-label');
             if (label) label.classList.remove('hidden');
 
@@ -482,7 +455,6 @@
             else navigator.vibrate([40, 50, 40]);
         }
 
-        // 수치 및 해설 확인을 위해 대기 시간 늘림 (2200ms)
         setTimeout(() => {
             state.currentIndex++;
             if (state.currentIndex >= state.totalQuestions) {
@@ -504,21 +476,24 @@
         else { comment = "괜찮아요! 퀴즈를 통해 인구를 익혀보세요."; emoji = "💪"; }
 
         appEl.innerHTML = `
-            <div class="flex-1 flex flex-col justify-between p-6 fade-in h-full max-w-xl mx-auto w-full">
-                <div class="flex flex-col items-center justify-center text-center my-auto">
+            <div class="flex-1 flex flex-col justify-between p-6 fade-in h-full max-w-2xl mx-auto w-full ls-row">
+                <div class="w-full ls-w-half flex flex-col items-center justify-center text-center ls-left-align mb-8 ls-my-0">
                     <div class="text-[64px] mb-3">${emoji}</div>
-                    <h2 class="text-base font-bold text-[#8B95A1] mb-1">총 ${state.totalQuestions}문제 중</h2>
-                    <div class="text-[52px] font-extrabold text-[#191F28] leading-none mb-4 tracking-tight">
+                    <h2 class="text-[15px] font-bold text-[#8B95A1] mb-1.5">총 ${state.totalQuestions}문제 중</h2>
+                    <div class="text-[56px] font-extrabold text-[#191F28] leading-none mb-4 tracking-tight">
                         ${state.score}<span class="text-2xl text-[#191F28] font-bold">개 정답</span>
                     </div>
-                    <p class="text-[15px] font-bold text-[#4E5968] bg-[#F2F4F6] px-4 py-2.5 rounded-[16px] break-keep">${comment}</p>
+                    <p class="text-[15px] font-bold text-[#4E5968] bg-[#F2F4F6] px-5 py-2.5 rounded-[16px] break-keep">${comment}</p>
                 </div>
                 
-                <div class="space-y-3 w-full mt-6">
-                    <button onclick="startQuiz('${state.mode}')" class="btn-press w-full bg-[#3182F6] text-white font-bold text-[16px] rounded-[18px] py-4 shadow-sm">
+                <div class="w-full h-[1px] bg-black/5 my-4 ls-divider-h"></div>
+                <div class="hidden ls-divider-v"></div>
+
+                <div class="w-full ls-w-half space-y-3 mt-4 ls-my-0 flex flex-col justify-center">
+                    <button onclick="startQuiz('${state.mode}')" class="btn-press w-full bg-[#3182F6] text-white font-bold text-[16px] rounded-[20px] py-4 shadow-sm hover:bg-blue-600">
                         다시 도전하기
                     </button>
-                    <button onclick="renderMenu()" class="btn-press w-full bg-[#F2F4F6] text-[#4E5968] font-bold text-[16px] rounded-[18px] py-4">
+                    <button onclick="renderMenu()" class="btn-press w-full bg-[#F2F4F6] text-[#4E5968] font-bold text-[16px] rounded-[20px] py-4 hover:bg-gray-200">
                         홈으로 돌아가기
                     </button>
                 </div>
