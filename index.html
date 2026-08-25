@@ -5,11 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>인구 수 퀴즈</title>
     
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌍</text></svg>">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23F2F4F6'/><text x='10' y='78' font-size='75'>🌍</text></svg>">
+    <!-- 표준 파비콘 및 애플 터치 아이콘 설정 -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌍</text></svg>">
+    <link rel="shortcut icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌍</text></svg>">
+    <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%23ffffff/><text x=%2210%22 y=%2278%22 font-size=%2275%22>🌍</text></svg>">
+    <link rel="apple-touch-icon-precomposed" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%23ffffff/><text x=%2210%22 y=%2278%22 font-size=%2275%22>🌍</text></svg>">
+    
+    <!-- PWA 웹 앱 메타 태그 -->
     <meta name="apple-mobile-web-app-title" content="인구 수 퀴즈">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#ffffff">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -83,13 +88,11 @@
             transition: width 0.3s ease-out;
         }
 
-        /* 기본 컨테이너 (모바일 세로) */
         .app-container {
             width: 100%;
             height: 100dvh;
         }
 
-        /* 태블릿 세로 및 일반 데스크탑 */
         @media (min-width: 640px) {
             .app-container {
                 max-width: 600px;
@@ -99,11 +102,10 @@
             }
         }
 
-        /* 가로 모드 (아이패드 가로, 데스크탑 넓은 화면) 대응 레이아웃 */
         @media (min-width: 768px) and (orientation: landscape), (min-width: 900px) {
             .app-container {
                 max-width: 920px;
-                height: clamp(520px, 85vh, 640px); /* 짤림 방지 높이 제한 */
+                height: clamp(520px, 85vh, 640px);
             }
             .ls-row { flex-direction: row !important; align-items: center !important; }
             .ls-left-align { align-items: flex-start !important; text-align: left !important; }
@@ -111,7 +113,6 @@
             .ls-my-0 { margin-top: 0 !important; margin-bottom: 0 !important; }
             .ls-ml-0 { margin-left: 0 !important; margin-right: auto !important; }
             .ls-w-half { flex: 1 !important; width: auto !important; }
-            /* 가로 분할 얇은 선 */
             .ls-divider-v { display: block !important; width: 1px !important; height: 60% !important; background-color: rgba(0,0,0,0.06); margin: 0 2rem; }
             .ls-divider-h { display: none !important; }
         }
@@ -193,10 +194,7 @@
     function renderMenu() {
         appEl.innerHTML = `
             <div class="flex-1 flex flex-col px-6 py-10 fade-in h-full justify-center ls-row">
-                
-                <!-- 왼쪽 영역 -->
                 <div class="w-full ls-w-half flex flex-col items-center justify-center text-center mb-10 ls-my-0">
-                    <!-- 심플한 지구 아이콘 (배경 제거) -->
                     <div class="flex justify-center mb-4">
                         <span class="text-[76px] sm:text-[84px] leading-none drop-shadow-sm">🌍</span>
                     </div>
@@ -204,11 +202,9 @@
                     <p class="text-[#8B95A1] text-[15px] sm:text-[16px] font-medium leading-relaxed break-keep max-w-[280px]">세계 주요 국가들의 인구 수와<br>연령대·고령화 지표를 맞춰보세요.</p>
                 </div>
                 
-                <!-- 얇은 구분선 -->
                 <div class="w-full h-[1px] bg-black/5 mb-8 ls-divider-h"></div>
                 <div class="hidden ls-divider-v"></div>
 
-                <!-- 오른쪽 영역 -->
                 <div class="w-full max-w-md mx-auto ls-w-half flex flex-col justify-center space-y-3.5">
                     <button onclick="startQuiz('pop')" class="btn-press w-full bg-[#F2F4F6] text-[#191F28] rounded-[20px] p-5 text-left border border-black/5 hover:bg-gray-200/60">
                         <div class="text-[17px] font-bold mb-0.5">인구 수 맞추기</div>
@@ -313,7 +309,6 @@
         if (q.type === 'pop') {
             contentHTML = `
                 <div class="flex-1 px-5 py-6 flex flex-col fade-in h-full max-w-3xl mx-auto w-full ls-row justify-center">
-                    <!-- 문제 (가로모드 시 완벽히 좌측 정렬) -->
                     <div class="w-full ls-w-half flex flex-col items-center justify-center text-center ls-left-align mb-6 ls-my-0">
                         <span class="inline-block text-[#3182F6] font-extrabold text-[13px] tracking-wider uppercase bg-blue-50 px-3.5 py-1 rounded-full mb-4 self-center ls-self-start">Q${qNum}</span>
                         <div class="w-40 h-28 sm:w-52 sm:h-36 rounded-[18px] overflow-hidden shadow-md border border-black/10 relative mb-4 sm:mb-5 mx-auto ls-ml-0">
@@ -323,11 +318,9 @@
                         <p class="text-[#8B95A1] font-medium text-[15px] sm:text-[16px]">이 국가의 인구 수는 얼마일까요?</p>
                     </div>
                     
-                    <!-- 구분선 -->
                     <div class="w-full h-[1px] bg-black/5 my-3 ls-divider-h"></div>
                     <div class="hidden ls-divider-v"></div>
 
-                    <!-- 선택지 -->
                     <div class="w-full ls-w-half space-y-3 mt-3 ls-my-0 flex flex-col justify-center">
                         ${q.options.map((opt) => `
                             <button onclick="handleAnswer(${opt}, ${q.answer}, this)" 
@@ -379,7 +372,6 @@
                         <span class="inline-block text-[#3182F6] font-extrabold text-[13px] tracking-wider uppercase bg-blue-50 px-3.5 py-1 rounded-full mb-4 self-center ls-self-start">Q${qNum}</span>
                         <h2 class="text-[22px] sm:text-[26px] font-extrabold leading-tight mb-4">다음 인구 구조를 가진 국가는?</h2>
                         
-                        <!-- 막대 차트 (가로 모드 시 완벽하게 좌측 정렬) -->
                         <div class="w-full max-w-[320px] bg-[#F9FAFB] p-5 rounded-[20px] border border-gray-200/70 shadow-sm space-y-3 mx-auto ls-ml-0">
                             <div class="text-[12px] font-bold text-gray-400 text-left">연령대별 인구 비율 (%)</div>
                             <div class="w-full h-8 bg-gray-200 rounded-xl overflow-hidden flex shadow-inner mb-3">
@@ -476,7 +468,7 @@
         else { comment = "괜찮아요! 퀴즈를 통해 인구를 익혀보세요."; emoji = "💪"; }
 
         appEl.innerHTML = `
-            <div class="flex-1 flex flex-col justify-between p-6 fade-in h-full max-w-2xl mx-auto w-full ls-row">
+            <div class="flex-1 flex flex-col justify-between p-6 fade-in h-full max-w-3xl mx-auto w-full ls-row">
                 <div class="w-full ls-w-half flex flex-col items-center justify-center text-center ls-left-align mb-8 ls-my-0">
                     <div class="text-[64px] mb-3">${emoji}</div>
                     <h2 class="text-[15px] font-bold text-[#8B95A1] mb-1.5">총 ${state.totalQuestions}문제 중</h2>
