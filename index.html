@@ -5,13 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>인구 수 퀴즈</title>
     
-    <!-- 표준 파비콘 및 애플 터치 아이콘 설정 -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌍</text></svg>">
-    <link rel="shortcut icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌍</text></svg>">
-    <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%23ffffff/><text x=%2210%22 y=%2278%22 font-size=%2275%22>🌍</text></svg>">
-    <link rel="apple-touch-icon-precomposed" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%23ffffff/><text x=%2210%22 y=%2278%22 font-size=%2275%22>🌍</text></svg>">
+    <!-- 아이폰 및 브라우저가 100% 인식하는 표준 SVG 기반 지구본 아이콘 -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%233182F6'/%3E%3Cpath d='M15 35h70M15 65h70M50 4c18 15 18 77 0 92M50 4c-18 15-18 77 0 92' fill='none' stroke='%23fff' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%233182F6'/%3E%3Ccircle cx='50' cy='50' r='40' fill='%233182F6'/%3E%3Cpath d='M15 35h70M15 65h70M50 10c15 13 15 67 0 80M50 10c-15 13-15 67 0 80' fill='none' stroke='%23fff' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E">
     
-    <!-- PWA 웹 앱 메타 태그 -->
     <meta name="apple-mobile-web-app-title" content="인구 수 퀴즈">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -251,9 +248,9 @@
                 { text: '인구가 가장 많은 국가는?', getAnswer: (arr) => [...arr].sort((a,b)=>b.pop - a.pop)[0], getValueText: (country) => `인구 약 ${formatPop(country.pop)}` },
                 { text: '인구가 가장 적은 국가는?', getAnswer: (arr) => [...arr].sort((a,b)=>a.pop - b.pop)[0], getValueText: (country) => `인구 약 ${formatPop(country.pop)}` },
                 { text: '유소년층(0~14세) 비율이 가장 높은 국가는?', getAnswer: (arr) => [...arr].sort((a,b)=>b.age[0] - a.age[0])[0], getValueText: (country) => `유소년 비율 ${country.age[0]}%` },
-                { text: '유소년층(0~14세) 비율이 가장 낮은 국가는?', getAnswer: (arr) => [...arr].sort((a,b)=>a.age[0] - b.age[0])[0], getValueText: (country) => `유소년 비율 ${country.age[0]}%` },
+                { text: '유소년층(0~14세) 비율이 가장 낮은 국가는?', getAnswer: (arr) => [...arr].sort((a,b)=>b.age[0] - a.age[0])[0], getValueText: (country) => `유소년 비율 ${country.age[0]}%` },
                 { text: '노년층(65세 이상) 비율이 가장 높은 국가는?', getAnswer: (arr) => [...arr].sort((a,b)=>b.age[2] - a.age[2])[0], getValueText: (country) => `노년 비율 ${country.age[2]}%` },
-                { text: '노년층(65세 이상) 비율이 가장 낮은 국가는?', getAnswer: (arr) => [...arr].sort((a,b)=>a.age[2] - b.age[2])[0], getValueText: (country) => `노년 비율 ${country.age[2]}%` },
+                { text: '노년층(65세 이상) 비율이 가장 낮은 국가는?', getAnswer: (arr) => [...arr].sort((a,b)=>b.age[2] - a.age[2])[0], getValueText: (country) => `노년 비율 ${country.age[2]}%` },
                 { text: '노년 부양비가 가장 높은 국가는?', getAnswer: (arr) => [...arr].sort((a,b)=>getOldDependency(b) - getOldDependency(a))[0], getValueText: (country) => `노년부양비 ${getOldDependency(country)}` },
                 { text: '노년 부양비가 가장 낮은 국가는?', getAnswer: (arr) => [...arr].sort((a,b)=>getOldDependency(a) - getOldDependency(b))[0], getValueText: (country) => `노년부양비 ${getOldDependency(country)}` },
                 { text: '중위 연령이 가장 높은(고령화된) 국가는?', getAnswer: (arr) => [...arr].sort((a,b)=>b.medianAge - a.medianAge)[0], getValueText: (country) => `중위 연령 ${country.medianAge}세` },
